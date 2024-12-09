@@ -58,8 +58,8 @@ export class TaskService implements ITaskService {
     return taskToUpdate;
   }
 
-  getAllTasks(completed: boolean): Task[] {
-    return this.tasks.filter((t) => !t.isDeleted);
+  getAllTasks(completed: boolean, withDeleted: boolean = false): Task[] {
+    return withDeleted ? this.tasks : this.tasks.filter((t) => !t.isDeleted);
   }
 
   getTaskById(id: number, isDeleted: boolean = false): Task | null {
