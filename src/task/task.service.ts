@@ -19,7 +19,11 @@ export class TaskService implements ITaskService {
   }
 
   updateTask(task: UpdateTaskDto): Task {
-    const taskToUpdate = this.tasks.filter((t) => t.id == task.id)[0];
+    const taskToUpdate = this.tasks.find((t) => t.id == task.id);
+
+    if (!taskToUpdate) {
+      throw new Error(`Task with id ${task.id} not found`);
+    }
 
     taskToUpdate.title = task.title;
     taskToUpdate.description = task.description;
@@ -29,7 +33,11 @@ export class TaskService implements ITaskService {
   }
 
   deleteTask(task: DeleteTaskDto): number {
-    const taskToDelete = this.tasks.filter((t) => t.id == task.id)[0];
+    const taskToDelete = this.tasks.find((t) => t.id == task.id);
+
+    if (!taskToDelete) {
+      throw new Error(`Task with id ${task.id} not found`);
+    }
 
     taskToDelete.isDeleted = true;
     taskToDelete.updatedDate = new Date();
@@ -38,7 +46,11 @@ export class TaskService implements ITaskService {
   }
 
   changeTaskStatus(task: ChangeTaskStatusDto): Task {
-    const taskToUpdate = this.tasks.filter((t) => t.id == task.id)[0];
+    const taskToUpdate = this.tasks.find((t) => t.id == task.id);
+
+    if (!taskToUpdate) {
+      throw new Error(`Task with id ${task.id} not found`);
+    }
 
     taskToUpdate.completed = task.completed;
     taskToUpdate.updatedDate = new Date();
@@ -51,7 +63,7 @@ export class TaskService implements ITaskService {
   }
 
   getTaskById(id: number, isDeleted: boolean = false): Task | null {
-    const task: Task | null = this.tasks.filter((t) => t.id == id && t.isDeleted == isDeleted)[0];
+    const task = this.tasks.find((t) => t.id == id && t.isDeleted == isDeleted) || null;
     return task;
   }
 }
