@@ -1,0 +1,10 @@
+{
+  "name": "task-cli",
+  "version": "1.0.0",
+  "main": "app.ts",
+  "author": "batugkocak",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.7.2"
+  }
+}
