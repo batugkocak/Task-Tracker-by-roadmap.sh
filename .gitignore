@@ -33,4 +33,4 @@ coverage/
 Thumbs.db
 
 # Project Specific
-src/data/
+src/data/tasks.json
