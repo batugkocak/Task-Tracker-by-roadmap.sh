@@ -31,3 +31,6 @@ coverage/
 
 # Operating system files
 Thumbs.db
+
+# Project Specific
+src/data/

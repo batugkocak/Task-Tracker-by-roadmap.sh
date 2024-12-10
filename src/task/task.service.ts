@@ -1,25 +1,32 @@
+import { FileService } from "../file/file.service";
 import { AddTaskDto, ChangeTaskStatusDto, DeleteTaskDto, ITaskService, Task, UpdateTaskDto } from "./task.interface";
 
 export class TaskService implements ITaskService {
-  tasks: Task[] = [];
-  lastIndex: number = 0;
+  private tasks: Task[] = [];
+
+  constructor(private fileService: FileService) {
+    this.initalizeTasks();
+  }
 
   addTask(task: AddTaskDto): Task {
-    this.lastIndex++;
+    this.initalizeTasks();
     const newTask: Task = {
-      id: this.lastIndex,
+      id: this.generateID(),
       ...task,
       completed: false,
       isDeleted: false,
       createdDate: new Date(),
       updatedDate: new Date(),
     };
+
     this.tasks.push(newTask);
+    this.fileService.writeAllTasks(this.tasks);
     return newTask;
   }
 
   updateTask(task: UpdateTaskDto): Task {
-    const taskToUpdate = this.tasks.find((t) => t.id == task.id);
+    this.initalizeTasks();
+    const taskToUpdate = this.tasks.find((t) => t.id === task.id);
 
     if (!taskToUpdate) {
       throw new Error(`Task with id ${task.id} not found`);
@@ -29,11 +36,14 @@ export class TaskService implements ITaskService {
     taskToUpdate.description = task.description;
     taskToUpdate.updatedDate = new Date();
 
+    this.fileService.writeAllTasks(this.tasks);
+
     return taskToUpdate;
   }
 
   deleteTask(task: DeleteTaskDto): number {
-    const taskToDelete = this.tasks.find((t) => t.id == task.id);
+    this.initalizeTasks();
+    const taskToDelete = this.tasks.find((t) => t.id === task.id);
 
     if (!taskToDelete) {
       throw new Error(`Task with id ${task.id} not found`);
@@ -42,11 +52,13 @@ export class TaskService implements ITaskService {
     taskToDelete.isDeleted = true;
     taskToDelete.updatedDate = new Date();
 
+    this.fileService.writeAllTasks(this.tasks);
     return task.id;
   }
 
   changeTaskStatus(task: ChangeTaskStatusDto): Task {
-    const taskToUpdate = this.tasks.find((t) => t.id == task.id);
+    this.initalizeTasks();
+    const taskToUpdate = this.tasks.find((t) => t.id === task.id);
 
     if (!taskToUpdate) {
       throw new Error(`Task with id ${task.id} not found`);
@@ -55,15 +67,28 @@ export class TaskService implements ITaskService {
     taskToUpdate.completed = task.completed;
     taskToUpdate.updatedDate = new Date();
 
+    this.fileService.writeAllTasks(this.tasks);
     return taskToUpdate;
   }
 
   getAllTasks(completed: boolean, withDeleted: boolean = false): Task[] {
-    return withDeleted ? this.tasks : this.tasks.filter((t) => !t.isDeleted);
+    this.initalizeTasks();
+    const filteredTasks = withDeleted ? this.tasks : this.tasks.filter((t) => !t.isDeleted);
+
+    return completed ? filteredTasks.filter((t) => t.completed) : filteredTasks;
   }
 
   getTaskById(id: number, isDeleted: boolean = false): Task | null {
-    const task = this.tasks.find((t) => t.id == id && t.isDeleted == isDeleted) || null;
-    return task;
+    this.initalizeTasks();
+    return this.tasks.find((t) => t.id === id && t.isDeleted === isDeleted) || null;
+  }
+
+  private generateID(): number {
+    const maxId = this.tasks.length ? Math.max(...this.tasks.map((t) => t.id)) : 0;
+    return maxId + 1;
+  }
+
+  private initalizeTasks(): void {
+    this.tasks = this.fileService.readAllTasks();
   }
 }
