@@ -2,8 +2,14 @@ import { CLIService } from "./cli/cli.service";
 import { FileService } from "./file/file.service";
 import { TaskService } from "./task/task.service";
 
-const fileService = new FileService("../data/tasks.json");
-const taskService = new TaskService(fileService);
-const cliService = new CLIService(taskService);
+import fs from "fs/promises";
+import path from "path";
 
-cliService.start();
+(async () => {
+  const fileService = new FileService("tasks.json");
+  await fileService.initialize();
+
+  const taskService = new TaskService(fileService);
+  const cliService = new CLIService(taskService);
+  cliService.start();
+})();

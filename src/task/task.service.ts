@@ -92,7 +92,7 @@ export class TaskService implements ITaskService {
     return maxId + 1;
   }
 
-  private initalizeTasks(): void {
-    this.tasks = this.fileService.readAllTasks();
+  private async initalizeTasks(): Promise<void> {
+    this.tasks = await this.fileService.readAllTasks();
   }
 }

@@ -1,34 +1,62 @@
 import { Task } from "../task/task.interface";
 import { IFileService } from "./file.interface";
 
-import fs from "fs";
+import fs from "fs/promises";
 import path from "path";
 
 export class FileService implements IFileService {
-  constructor(private filePath: string) {
-    this.filePath = path.resolve(__dirname, filePath);
+  private filePath: string;
+  private baseDir: string;
 
-    let pathExists = fs.existsSync(this.filePath);
-
-    if (!pathExists) {
-      fs.writeFileSync(this.filePath, "");
-    }
+  constructor(private fileName: string) {
+    this.baseDir = path.resolve(__dirname, "../data");
+    this.filePath = path.resolve(this.baseDir, fileName);
   }
 
-  readAllTasks(): Task[] {
-    const fileContent = fs.readFileSync(this.filePath, "utf8");
-    if (fileContent == "") {
-      console.log("There is no tasks in the file!");
+  async readAllTasks(): Promise<Task[]> {
+    try {
+      const fileContent = await fs.readFile(this.filePath, "utf8");
+      return fileContent === "[]" ? [] : JSON.parse(fileContent);
+    } catch (error) {
+      console.error(`Failed to read file at ${this.filePath}:`, error);
       return [];
     }
-    const tasks: Task[] = JSON.parse(fileContent);
-    return tasks;
   }
-  writeAllTasks(tasks: Task[]): void {
-    fs.writeFileSync(this.filePath, JSON.stringify(tasks));
+
+  async writeAllTasks(tasks: Task[]): Promise<void> {
+    try {
+      await fs.writeFile(this.filePath, JSON.stringify(tasks, null, 2));
+    } catch (error) {
+      console.error(`Failed to write to file at ${this.filePath}:`, error);
+    }
   }
-  private initialize(): void {
-    if (!fs.existsSync(this.filePath)) {
+
+  private async ensureFolderExists(): Promise<void> {
+    try {
+      const stats = await fs.stat(this.baseDir);
+      if (!stats.isDirectory()) {
+        throw new Error("Not a directory");
+      }
+    } catch {
+      await fs.mkdir(this.baseDir, { recursive: true });
+    }
+  }
+
+  private async ensureFileExists(): Promise<void> {
+    try {
+      await fs.access(this.filePath);
+    } catch {
+      await fs.writeFile(this.filePath, JSON.stringify([], null, 2));
+    }
+  }
+
+  async initialize(): Promise<void> {
+    try {
+      await this.ensureFolderExists();
+      await this.ensureFileExists();
+      console.log("Initialization complete.");
+    } catch (error) {
+      console.error("Failed to initialize file service:", error);
     }
   }
 }

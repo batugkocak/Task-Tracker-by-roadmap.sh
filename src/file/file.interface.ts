@@ -1,7 +1,7 @@
 import { Task } from "../task/task.interface";
 
 export interface IFileService {
-  readAllTasks(): Task[];
+  readAllTasks(): Promise<Task[]>;
 
-  writeAllTasks(tasks: Task[]): void;
+  writeAllTasks(tasks: Task[]): Promise<void>;
 }
