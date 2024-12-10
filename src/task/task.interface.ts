@@ -32,6 +32,6 @@ export interface ITaskService {
   updateTask(task: UpdateTaskDto): Task;
   deleteTask(task: DeleteTaskDto): number;
   changeTaskStatus(task: ChangeTaskStatusDto): Task;
-  getAllTasks(completed: boolean, withDeleted: boolean): Task[];
+  getAllTasks(completed?: boolean, withDeleted?: boolean): Task[];
   getTaskById(id: number, isDeleted: boolean): Task | null;
 }

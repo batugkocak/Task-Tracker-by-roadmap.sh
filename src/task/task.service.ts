@@ -71,11 +71,15 @@ export class TaskService implements ITaskService {
     return taskToUpdate;
   }
 
-  getAllTasks(completed: boolean, withDeleted: boolean = false): Task[] {
+  getAllTasks(completed?: boolean, withDeleted: boolean = false): Task[] {
     this.initalizeTasks();
     const filteredTasks = withDeleted ? this.tasks : this.tasks.filter((t) => !t.isDeleted);
 
-    return completed ? filteredTasks.filter((t) => t.completed) : filteredTasks;
+    if (completed === undefined) {
+      return filteredTasks;
+    }
+
+    return filteredTasks.filter((t) => t.completed === completed);
   }
 
   getTaskById(id: number, isDeleted: boolean = false): Task | null {
